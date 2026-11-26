@@ -69,6 +69,10 @@ endif()
 
 add_subdirectory(importexport)
 
+if (AU_BUILD_MCPBRIDGE_MODULE)
+    add_subdirectory(mcpbridge)
+endif()
+
 add_subdirectory(uicomponents)
 
 # Stubs
