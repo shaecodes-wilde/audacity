@@ -3,6 +3,7 @@
  */
 
 #include <QApplication>
+#include <QStringList>
 #include <QStyleHints>
 #include <QTextCodec>
 
@@ -85,9 +86,14 @@ int main(int argc, char** argv)
         qputenv("QT_QPA_PLATFORMTHEME", "gtk3");
     }
 
-    //! NOTE Forced X11, with Wayland there are a number of problems now
-    if (qEnvironmentVariable("AU_QT_QPA_PLATFORM") == "") {
-        qputenv("QT_QPA_PLATFORM", "xcb");
+    if (qEnvironmentVariableIsEmpty("AU_QT_QPA_PLATFORM")) {
+        // Hyprland warps the pointer when XWayland dialogs request activation.
+        const QStringList desktops = qEnvironmentVariable("XDG_CURRENT_DESKTOP").split(u':');
+        const bool hyprlandWayland = !qEnvironmentVariableIsEmpty("WAYLAND_DISPLAY")
+                                     && desktops.contains(QStringLiteral("Hyprland"), Qt::CaseInsensitive);
+        if (!hyprlandWayland || qEnvironmentVariableIsEmpty("QT_QPA_PLATFORM")) {
+            qputenv("QT_QPA_PLATFORM", hyprlandWayland ? "wayland;xcb" : "xcb");
+        }
     }
 #endif
 
